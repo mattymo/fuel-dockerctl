@@ -1,0 +1,45 @@
+#!/bin/bash
+
+### Container information
+#Paths
+DOCKER_ROOT="/var/www/nailgun/docker"
+IMAGE_DIR="${docker_root}/images"
+SOURCE_DIR="${docker_root}/sources"
+SUPERVISOR_CONF_DIR="${docker_root}/supervisor.d"
+
+#Version of Fuel to deploy
+VERSION="5.0"
+IMAGE_PREFIX="fuel"
+# busybox image for storage containers
+BUSYBOX_IMAGE="busybox.tar.gz"
+# base centos image for all containers
+BASE_IMAGE="centos.tar.gz"
+
+# source images for apps
+COBBLER_IMAGE="${IMAGE_DIR}/cobbler.tar.gz"
+POSTGRES_IMAGE="${IMAGE_DIR}/postgres.tar.gz"
+RABBITMQ_IMAGE="${IMAGE_DIR}/rabbitmq.tar.gz"
+RSYNC_IMAGE="${IMAGE_DIR}/rsync.tar.gz"
+ASTUTE_IMAGE="${IMAGE_DIR}/astute.tar.gz"
+NAILGUN_IMAGE="${IMAGE_DIR}/nailgun.tar.gz"
+OSTF_IMAGE="${IMAGE_DIR}/ostf.tar.gz"
+NGINX_IMAGE="${IMAGE_DIR}/nginx.tar.gz"
+
+# app container names
+CNT_PREFIX="fuel-core-${version}-"
+COBBLER_CNT="${prefix}cobbler"
+POSTGRES_CNT="${prefix}postgres"
+RABBITMQ_CNT="${prefix}rabbitmq"
+RSYNC_CNT="${prefix}rsync"
+ASTUTE_CNT="${prefix}astute"
+NAILGUN_CNT="${prefix}nailgun"
+OSTF_CNT="${prefix}ostf"
+NGINX_CNT="${prefix}nginx"
+
+# storage container names
+PREFIX_STORAGE="fuel-storage-${version}-"
+DUMP_CNT="${prefix}dump"
+REPO_CNT="${prefix}repo"
+DUMP_CNT="${prefix}puppet"
+
+
