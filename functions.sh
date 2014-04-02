@@ -1,5 +1,18 @@
 #!/bin/bash
 
+function show_usage {
+  echo "$0 usage:"
+  echo "  $0 command"
+  echo
+  echo "Available commands: (Note: work in progress)"
+  echo "  help: show this message"
+  echo "  build: create all Docker containers"
+  echo "  start: start all Docker containers"
+  echo "  restart: restart one or more Docker containers"
+  echo "  stop: stop one or more Docker containers"
+  echo "  upgrade: upgrade deployment"
+}
+
 function build_image {
   docker build -t $2 $1
 }
@@ -63,6 +76,9 @@ function container_created {
 }
 
 function first_run_container {
-  echo "Not implemented yet"
+  opts="$CONTAINER_OPTS[${1}]"
+  name="$CONTAINER_NAMES[${1}]"
+  image="$CONTAINER_IMAGES[${1}]"
+  docker run $opts --name=$name $image 
   return 0
 }

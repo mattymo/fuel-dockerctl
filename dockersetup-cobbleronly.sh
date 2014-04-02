@@ -9,6 +9,11 @@ if [ -z "$1" ] || [ "$1" = "help"]; then
   show_usage
   exit 1
 fi
+if [ -z "$2" ] || [ "$2" = "all" ]; then
+  container="all"
+else
+  container=$2
+fi
 
 if [ "$1" == "build" ]; then
   #Step 1: prepare storage containers
@@ -16,14 +21,13 @@ if [ "$1" == "build" ]; then
   run_storage_containers
 
   #Step 2: import app images
-  import_images "$COBBLER_IMAGE" "$POSTGRES_IMAGE" "$RABBITMQ_IMAGE" \
-  "$RSYNC_IMAGE" "$ASTUTE_IMAGE" "$NAILGUN_IMAGE" "$OSTF_IMAGE" "$NGINX_IMAGE"
+  import_images "$COBBLER_IMAGE"
 
   #Step 3: Prepare supervisord
   cp $SUPERVISOR_CONF_DIR/* /etc/supervisord.d/
 
   #Step 3: Launch in order once
-  apps="cobbler postgres rabbitmq rsync astute nailgun ostf nginx"
+  apps="cobbler"
   for service in $apps; do
     supervisorctl start $service
     sleep 2
@@ -37,6 +41,6 @@ elif [ "$1" == "stop" ]; then
   stop_container $container
 elif [ "$1" == "upgrade" ]; then
   upgrade_container $container
-elif [ "$1" == "backup" ]; then
+elif [ "$1" == "backup" ]; thn
   backup_container $container
 fi

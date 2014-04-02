@@ -16,30 +16,46 @@ BUSYBOX_IMAGE="busybox.tar.gz"
 BASE_IMAGE="centos.tar.gz"
 
 # source images for apps
-COBBLER_IMAGE="${IMAGE_DIR}/cobbler.tar.gz"
-POSTGRES_IMAGE="${IMAGE_DIR}/postgres.tar.gz"
-RABBITMQ_IMAGE="${IMAGE_DIR}/rabbitmq.tar.gz"
-RSYNC_IMAGE="${IMAGE_DIR}/rsync.tar.gz"
-ASTUTE_IMAGE="${IMAGE_DIR}/astute.tar.gz"
-NAILGUN_IMAGE="${IMAGE_DIR}/nailgun.tar.gz"
-OSTF_IMAGE="${IMAGE_DIR}/ostf.tar.gz"
-NGINX_IMAGE="${IMAGE_DIR}/nginx.tar.gz"
+declare -A SOURCE_IMAGES
+SOURCE_IMAGES['cobbler']="${IMAGE_DIR}cobbler"
+SOURCE_IMAGES['postgres']="${IMAGE_DIR}postgres"
+SOURCE_IMAGES['cobbler']="${IMAGE_DIR}rabbitmq"
+SOURCE_IMAGES['rsync']="${IMAGE_DIR}rsync"
+SOURCE_IMAGES['astute']="${IMAGE_DIR}astute"
+SOURCE_IMAGES['nailgun']="${IMAGE_DIR}nailgun"
+SOURCE_IMAGES['ostf']="${IMAGE_DIR}ostf"
+SOURCE_IMAGES['nginx']="${IMAGE_DIR}nginx"
 
 # app container names
-CNT_PREFIX="fuel-core-${version}-"
-COBBLER_CNT="${prefix}cobbler"
-POSTGRES_CNT="${prefix}postgres"
-RABBITMQ_CNT="${prefix}rabbitmq"
-RSYNC_CNT="${prefix}rsync"
-ASTUTE_CNT="${prefix}astute"
-NAILGUN_CNT="${prefix}nailgun"
-OSTF_CNT="${prefix}ostf"
-NGINX_CNT="${prefix}nginx"
+declare -A CONTAINER_NAMES
+prefix="fuel-core-${version}-"
+CONTAINER_NAMES['cobbler']="${prefix}cobbler"
+CONTAINER_NAMES['postgres']="${prefix}postgres"
+CONTAINER_NAMES['cobbler']="${prefix}rabbitmq"
+CONTAINER_NAMES['rsync']="${prefix}rsync"
+CONTAINER_NAMES['astute']="${prefix}astute"
+CONTAINER_NAMES['nailgun']="${prefix}nailgun"
+CONTAINER_NAMES['ostf']="${prefix}ostf"
+CONTAINER_NAMES['nginx']="${prefix}nginx"
+
+# app container options
+declare -A CONTAINER_OPTIONS
+base_opts="-t"
+CONTAINER_OPTIONS["cobbler"]="-p 53:53/udp -p 67:67/udp -p 80:80 -p 443:443 $base_opts"
+CONTAINER_OPTIONS["postgres"]="-p 5432:5432 $base_opts"
+CONTAINER_OPTIONS["rabbitmq"]="-p 5672:5672 -p 4369:4369 -p 15672:15672 $base_opts"
+CONTAINER_OPTIONS["rsync"]="-p 873:873 $base_opts"
+CONTAINER_OPTIONS["astute"]="$base_opts"
+CONTAINER_OPTIONS["nailgun"]="-p 8001:8001 $base_opts"
+CONTAINER_OPTIONS["ostf"]="-p 8777:8777 $base_opts"
+CONTAINER_OPTIONS["nginx"]="-p 8000:8000 -p 8080:8080 $base_opts"
+
+
+
 
 # storage container names
 PREFIX_STORAGE="fuel-storage-${version}-"
 DUMP_CNT="${prefix}dump"
 REPO_CNT="${prefix}repo"
 DUMP_CNT="${prefix}puppet"
-
 
