@@ -59,12 +59,16 @@ function start_container {
     echo "Must specify a container name" 1>&2
     exit 1
   fi
-  container_name=container_lookup "$1"
+  container_name="$1"
   if container_created "$1"; then
     docker start $container_name
   else
     first_run_container "$1" "$container_name"
   fi
+}
+
+function stop_container {
+  docker stop $CONTAINER_NAMES[$1]
 }
 
 function container_lookup {
