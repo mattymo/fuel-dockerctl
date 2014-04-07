@@ -10,6 +10,12 @@ if [ -z "$1" ] || [ "$1" = "help"]; then
   exit 1
 fi
 
+if [ -z "$2" ] || [ "$2" = "all" ]; then
+  container="all"
+else
+  container=$2
+fi
+
 if [ "$1" == "build" ]; then
   #Step 1: prepare storage containers
   build_storage_containers
@@ -23,7 +29,7 @@ if [ "$1" == "build" ]; then
   cp $SUPERVISOR_CONF_DIR/* /etc/supervisord.d/
 
   #Step 3: Launch in order once
-  apps="cobbler postgres rabbitmq rsync astute nailgun ostf nginx"
+  apps="cobbler postgres rabbitmq rsync astute nailgun ostf nginx mcollective"
   for service in $apps; do
     supervisorctl start $service
     sleep 2

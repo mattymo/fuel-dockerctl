@@ -50,7 +50,7 @@ function export_containers {
 
   for image in $@; do
     [ $trim ] && image=$(sed "s/${CNT_PREFIX}//" <<< "$image")
-    docker export container | gzip -c > "${image}.tar.gz"
+    docker export $1 | gzip -c > "${image}.tar.gz"
   done
 }
 
