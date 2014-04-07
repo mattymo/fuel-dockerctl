@@ -3,9 +3,11 @@
 ### Container information
 #Paths
 DOCKER_ROOT="/var/www/nailgun/docker"
-IMAGE_DIR="${docker_root}/images"
-SOURCE_DIR="${docker_root}/sources"
-SUPERVISOR_CONF_DIR="${docker_root}/supervisor.d"
+IMAGE_DIR="${DOCKER_ROOT}/images"
+SOURCE_DIR="${DOCKER_ROOT}/sources"
+#SUPERVISOR_CONF_DIR="${docker_root}/supervisor.d"
+#SUPERVISOR_CONF_DIR="${docker_root}/supervisor"
+SUPERVISOR_CONF_DIR="./supervisor/"
 
 #Version of Fuel to deploy
 VERSION="5.0"
@@ -18,20 +20,20 @@ BASE_IMAGE="centos.tar.gz"
 ZIP_EXT=".tar.xz"
 # source images for apps
 declare -A SOURCE_IMAGES
-SOURCE_IMAGES['cobbler']="${IMAGE_DIR}cobbler${ZIP_EXT}"
-SOURCE_IMAGES['postgres']="${IMAGE_DIR}postgres${ZIP_EXT}"
-SOURCE_IMAGES['cobbler']="${IMAGE_DIR}rabbitmq${ZIP_EXT}"
-SOURCE_IMAGES['rsync']="${IMAGE_DIR}rsync${ZIP_EXT}"
-SOURCE_IMAGES['astute']="${IMAGE_DIR}astute${ZIP_EXT}"
-SOURCE_IMAGES['nailgun']="${IMAGE_DIR}nailgun${ZIP_EXT}"
-SOURCE_IMAGES['ostf']="${IMAGE_DIR}ostf${ZIP_EXT}"
-SOURCE_IMAGES['nginx']="${IMAGE_DIR}nginx${ZIP_EXT}"
-SOURCE_IMAGES['rsyslog']="${IMAGE_DIR}rsyslog${ZIP_EXT}"
-SOURCE_IMAGES['mcollective']="${IMAGE_DIR}mcollective${ZIP_EXT}"
+SOURCE_IMAGES['cobbler']="${IMAGE_DIR}/cobbler${ZIP_EXT}"
+SOURCE_IMAGES['postgres']="${IMAGE_DIR}/postgres${ZIP_EXT}"
+SOURCE_IMAGES['cobbler']="${IMAGE_DIR}/rabbitmq${ZIP_EXT}"
+SOURCE_IMAGES['rsync']="${IMAGE_DIR}/rsync${ZIP_EXT}"
+SOURCE_IMAGES['astute']="${IMAGE_DIR}/astute${ZIP_EXT}"
+SOURCE_IMAGES['nailgun']="${IMAGE_DIR}/nailgun${ZIP_EXT}"
+SOURCE_IMAGES['ostf']="${IMAGE_DIR}/ostf${ZIP_EXT}"
+SOURCE_IMAGES['nginx']="${IMAGE_DIR}/nginx${ZIP_EXT}"
+SOURCE_IMAGES['rsyslog']="${IMAGE_DIR}/rsyslog${ZIP_EXT}"
+SOURCE_IMAGES['mcollective']="${IMAGE_DIR}/mcollective${ZIP_EXT}"
 
 # app container names
 declare -A CONTAINER_NAMES
-prefix="fuel-core-${version}-"
+prefix="fuel-core-${VERSION}-"
 CONTAINER_NAMES['cobbler']="${prefix}cobbler"
 CONTAINER_NAMES['postgres']="${prefix}postgres"
 CONTAINER_NAMES['cobbler']="${prefix}rabbitmq"
@@ -58,8 +60,8 @@ CONTAINER_OPTIONS["rsyslog"]="-p 514:514 -p 514:514/udp $base_opts"
 CONTAINER_OPTIONS["mcollective"]="$base_opts"
 
 # storage container names
-PREFIX_STORAGE="fuel-storage-${version}-"
-DUMP_CNT="${prefix}dump"
-REPO_CNT="${prefix}repo"
-DUMP_CNT="${prefix}puppet"
-LOG_CNT="${prefix}log"
+PREFIX_STORAGE="fuel-storage-${VERSION}-"
+DUMP_CNT="${PREFIX_STORAGE}dump"
+REPO_CNT="${PREFIX_STORAGE}repo"
+PUPPET_CNT="${PREFIX_STORAGE}puppet"
+LOG_CNT="${PREFIX_STORAGE}log"

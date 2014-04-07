@@ -18,19 +18,28 @@ function build_image {
 }
 
 function build_storage_containers {
-  build_image storage-dump "storage/dump"
-  build_image storage-repo "storage/repo"
-  build_image storage-puppet "storage/puppet"
+  build_image sources/storage-dump storage/dump
+  build_image sources/storage-repo storage/repo
+  build_image sources/storage-puppet storage/puppet
 }
 
 function run_storage_containers {
   #Run storage containers once
   #Note: storage containers exit, but keep volumes available
-  docker run -d --name "$DUMP_CNT" storage/dump
-  docker run -d --name "$REPO_CNT" storage/repo
-  docker run -d --name "$PUPPET_CNT" storage/puppet
+  
+  #Remove existing ones if they exist
+  kill_storage_containers
+  docker run -d --name "$DUMP_CNT" storage/dump || true
+  docker run -d --name "$REPO_CNT" storage/repo || true
+  docker run -d --name "$PUPPET_CNT" storage/puppet || true
 }
 
+function kill_storage_containers {
+  containers=$(docker ps -a | egrep "($DUMP_CNT|$REPO_CNT|$PUPPET_CNT)" | cut -d' ' -f1)
+  if [ -n "$containers" ]; then
+    docker rm $containers || true
+  fi
+}
 function import_images {
 
   for image_archive in $@; do
@@ -86,3 +95,4 @@ function first_run_container {
   docker run $opts --name=$name $image 
   return 0
 }
+
