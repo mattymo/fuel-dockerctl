@@ -22,9 +22,7 @@ if [ "$1" == "build" ]; then
   run_storage_containers
 
   #Step 2: import app images
-  import_images "$COBBLER_IMAGE" "$POSTGRES_IMAGE" "$RABBITMQ_IMAGE" \
-  "$RSYNC_IMAGE" "$ASTUTE_IMAGE" "$NAILGUN_IMAGE" "$OSTF_IMAGE" "$NGINX_IMAGE"
-  import_images $SOURCE_IMAGES
+  import_images ${SOURCE_IMAGES[@]}
 
   #Step 3: Prepare supervisord
   cp $SUPERVISOR_CONF_DIR/* /etc/supervisord.d/
