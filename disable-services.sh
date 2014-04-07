@@ -8,5 +8,5 @@ for system_service in $system_services; do
   service $system_service stop
 done
 for supervisord_service in $supervisord_services; do
-  supervisord stop $supervisord_service
+  supervisorctl stop $supervisord_service
 done

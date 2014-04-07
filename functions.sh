@@ -13,6 +13,11 @@ function show_usage {
   echo "  upgrade: upgrade deployment"
 }
 
+function debug {
+  if $DEBUG; then
+    echo $@
+  fi
+}
 function build_image {
   docker build -t $2 $1
 }
@@ -40,11 +45,21 @@ function kill_storage_containers {
     docker rm $containers || true
   fi
 }
-function import_images {
 
+function import_images {
+  #Imports images with xz, gzip, or simple tar format
   for image_archive in $@; do
+    debug "Importing $image_archive"
     image="$(echo $image_archive | cut -d. -f1)"
-    zcat "$image_archive" | docker import - "${IMAGE_PREFIX}/${image}"
+    if egrep -q "gz\$" <<< "$image_archive"; then
+      zcat "$image_archive" | docker load
+    elif egrep -q "xz\$" <<< "$image_archive"; then
+      #xz -dkc "$image_archive" | docker load - "${IMAGE_PREFIX}/${image}"
+      xz -dkc "$image_archive" | docker load
+    else
+      #try to just import
+      cat "$image_archive" | docker load
+    fi
   done
 }
 

@@ -4,6 +4,7 @@
 confdir="./"
 . "$confdir/config"
 . "$confdir/functions.sh"
+DEBUG=true
 
 if [ -z "$1" ] || [ "$1" = "help" ]; then
   show_usage
