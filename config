@@ -8,7 +8,7 @@ SOURCE_DIR="${DOCKER_ROOT}/sources"
 #SUPERVISOR_CONF_DIR="${docker_root}/supervisor.d"
 #SUPERVISOR_CONF_DIR="${docker_root}/supervisor"
 SUPERVISOR_CONF_DIR="./supervisor/"
-
+ASTUTE_YAML=/etc/astute.yaml
 #Version of Fuel to deploy
 VERSION="5.0"
 IMAGE_PREFIX="fuel"
@@ -36,18 +36,20 @@ declare -A CONTAINER_NAMES
 prefix="fuel-core-${VERSION}-"
 CONTAINER_NAMES['cobbler']="${prefix}cobbler"
 CONTAINER_NAMES['postgres']="${prefix}postgres"
-CONTAINER_NAMES['cobbler']="${prefix}rabbitmq"
+CONTAINER_NAMES['rabbitmq']="${prefix}rabbitmq"
 CONTAINER_NAMES['rsync']="${prefix}rsync"
 CONTAINER_NAMES['astute']="${prefix}astute"
 CONTAINER_NAMES['nailgun']="${prefix}nailgun"
 CONTAINER_NAMES['ostf']="${prefix}ostf"
 CONTAINER_NAMES['nginx']="${prefix}nginx"
-CONTAINER_NAMES['rsyslogd']="${prefix}rsyslog"
+CONTAINER_NAMES['rsyslog']="${prefix}rsyslog"
 CONTAINER_NAMES['mcollective']="${prefix}mcollective"
 
 # app container options
 declare -A CONTAINER_OPTIONS
 base_opts="-t"
+FOREGROUND="-i"
+BACKGROUND="-d"
 CONTAINER_OPTIONS["cobbler"]="-p 53:53/udp -p 67:67/udp -p 80:80 -p 443:443 $base_opts"
 CONTAINER_OPTIONS["postgres"]="-p 5432:5432 $base_opts"
 CONTAINER_OPTIONS["rabbitmq"]="-p 5672:5672 -p 4369:4369 -p 15672:15672 -p 61613:61613 $base_opts"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-system_services="cobblerd httpd xinetd postgresql rabbitmq-server nginx dnsmasq"
+system_services="cobblerd httpd xinetd postgresql rabbitmq-server nginx dnsmasq rsyslog"
 supervisord_services="assassind nailgun naily ostf receiverd"
 
 for system_service in $system_services; do
