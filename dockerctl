@@ -7,6 +7,7 @@ confdir="/root/fuel-dockerctl/"
 DEBUG=true
 
 if [ -z "$1" ] || [ "$1" = "help" ]; then
+  echo "Please specify a command."
   show_usage
   exit 1
 fi
@@ -46,6 +47,9 @@ if [ "$1" == "build" ]; then
 elif [ "$1" == "start" ]; then
   shift 2
   start_container $container $@
+elif [ "$1" == "restart" ]; then
+  shift 2
+  restart_container $container $@
 elif [ "$1" == "stop" ]; then
   shift 2
   stop_container $container $@
@@ -59,5 +63,6 @@ elif [ "$1" == "destroy" ]; then
   shift 2
   destroy_container $container $@
 else
+  echo "Invalid selection."
   show_usage
 fi

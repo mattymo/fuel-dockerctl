@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function show_usage {
-  echo "$0 usage:"
+  echo "Usage:"
   echo "  $0 command"
   echo
   echo "Available commands: (Note: work in progress)"
@@ -11,6 +11,7 @@ function show_usage {
   echo "  restart: restart one or more Docker containers"
   echo "  stop: stop one or more Docker containers"
   echo "  upgrade: upgrade deployment"
+  echo "  destroy: destroy one or more containers"
 }
 function debug {
   if $DEBUG; then
@@ -34,10 +35,10 @@ function run_storage_containers {
   
   #Remove existing ones if they exist
   kill_storage_containers
-  docker run -d --name "$DUMP_CNT" storage/dump || true
-  docker run -d -v /var/www/nailgun:/var/www/nailgun --name "$REPO_CNT" storage/repo || true
-  docker run -d -v /etc/puppet:/etc/puppet --name "$PUPPET_CNT" storage/puppet || true
-  docker run -d --name "$LOG_CNT" storage/log || true
+  docker run -d ${CONTAINER_VOLUMES[$DUMP_CNT]} --name "$DUMP_CNT" storage/dump || true
+  docker run -d ${CONTAINER_VOLUMES[$REPO_CNT]} --name "$REPO_CNT" storage/repo || true
+  docker run -d ${CONTAINER_VOLUMES[$PUPPET_CNT]} --name "$PUPPET_CNT" storage/puppet || true
+  docker run -d ${CONTAINER_VOLUMES[$LOG_CNT]} --name "$LOG_CNT" storage/log || true
 }
 
 function kill_storage_containers {
@@ -92,7 +93,11 @@ function start_container {
   container_name=${CONTAINER_NAMES[$1]}
   if container_created "$container_name"; then
     if is_running "$container_name"; then
-      echo "$container_name is already running."
+      if is_ghost "$container_name"; then
+        restart_container $1
+      else
+        echo "$container_name is already running."
+      fi
     else
       docker start $container_name
     fi
@@ -109,9 +114,10 @@ function attach_container {
   echo "Attaching to container $container_name..."
   docker attach $1
 }
+
 function stop_container {
-  if $container == 'all'; then
-    docker stop $CONTAINER_NAMES[$1]
+  if [[ $container == 'all' ]]; then
+    docker stop ${CONTAINER_NAMES[$1]}
   else 
     for container in $@; do
       docker stop ${CONTAINER_NAMES[$container]}
@@ -120,7 +126,7 @@ function stop_container {
 }
 
 function destroy_container {
-  if $container == 'all'; then
+  if [[ "$container" == 'all' ]]; then
     stop_container ${CONTAINER_NAMES[@]}
     docker rm ${CONTAINER_NAMES[@]}
   else
@@ -132,16 +138,19 @@ function destroy_container {
 
 
 function restart_container {
-  stop_container $1
-  start_container $1
+  docker restart ${CONTAINER_NAMES[$1]}
 }
 
 function container_lookup {
-  return $CNT_PREFIX-$1
+  echo ${CONTAINER_NAMES[$1]}
 }
 
 function container_created {
   docker ps -a | grep -q $1
+  return $?
+}
+function is_ghost {
+  LANG=C docker ps | grep $1 | grep -q Ghost
   return $?
 }
 function is_running {
@@ -150,7 +159,7 @@ function is_running {
 }
 function first_run_container {
 
-  opts="${CONTAINER_OPTIONS[$1]}"
+  opts="${CONTAINER_OPTIONS[$1]} ${CONTAINER_VOLUMES[$1]}"
   container_name="${CONTAINER_NAMES[$1]}"
   image="$IMAGE_PREFIX/$1"
   if ! is_running $container_name; then
