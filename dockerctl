@@ -19,7 +19,10 @@ else
 fi
 
 if [ "$1" == "build" ]; then
-  if [ "$container" = "all" ]; then
+  if [ "$container" = "storage" ]; then
+    build_storage_containers
+    run_storage_containers
+  elif [ "$container" = "all" ];then
     #Step 1: prepare storage containers
     build_storage_containers
     run_storage_containers

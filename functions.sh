@@ -116,21 +116,23 @@ function attach_container {
 }
 
 function stop_container {
-  if [[ $container == 'all' ]]; then
+  if [[ "$1" == 'all' ]]; then
     docker stop ${CONTAINER_NAMES[$1]}
   else 
     for container in $@; do
+      echo "Stopping $container..."
       docker stop ${CONTAINER_NAMES[$container]}
     done
   fi
 }
 
 function destroy_container {
-  if [[ "$container" == 'all' ]]; then
-    stop_container ${CONTAINER_NAMES[@]}
+  if [[ "$1" == 'all' ]]; then
+    stop_container all
     docker rm ${CONTAINER_NAMES[@]}
   else
     for container in $@; do
+      stop_container $container
       docker rm ${CONTAINER_NAMES[$container]}
     done
   fi

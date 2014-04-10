@@ -115,7 +115,7 @@ REQS["--volumes-from $CONTAINER_NAME['nailgun']"]="nginx"
 
 #assemble requirements 
 for requirement in "${!REQS[@]}"; do
-  for container in REQS["$requirement"]; do
+  for container in ${REQS["$requirement"]}; do
     CONTAINER_VOLUMES["$container"]+="${requirement} "
   done
 done
