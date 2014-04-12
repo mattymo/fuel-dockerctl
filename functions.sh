@@ -226,7 +226,7 @@ function setup_dhcrelay_for_cobbler {
     echo "ERROR: Cobbler container isn't running." 1>&2
     exit 1
   fi
-  cobbler_ip=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' ${CONTAINER_NAME["cobbler"]})
+  cobbler_ip=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' ${CONTAINER_NAMES["cobbler"]})
   admin_interface=$(grep interface: $ASTUTE_YAML | cut -d':' -f2 | tr -d ' ')
   cat > /etc/sysconfig/dhcrelay << EOF
 # Command line options here
