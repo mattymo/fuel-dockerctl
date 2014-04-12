@@ -57,7 +57,7 @@ declare -A CONTAINER_OPTIONS
 base_opts="-t"
 FOREGROUND="-i"
 BACKGROUND="-d"
-CONTAINER_OPTIONS["cobbler"]="-p 53:53/udp -p 67:67/udp -p 80:80 -p 443:443 $base_opts"
+CONTAINER_OPTIONS["cobbler"]="-p 53:53/udp -p 69:69/udp -p 80:80 -p 443:443 $base_opts"
 CONTAINER_OPTIONS["postgres"]="-p 5432:5432 $base_opts"
 CONTAINER_OPTIONS["rabbitmq"]="-p 5672:5672 -p 4369:4369 -p 15672:15672 -p 61613:61613 $base_opts"
 CONTAINER_OPTIONS["rsync"]="-p 873:873 $base_opts"
