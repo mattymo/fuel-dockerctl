@@ -75,8 +75,7 @@ CONTAINER_OPTIONS["mcollective"]="$base_opts"
 #Host volumes
 declare -A HOST_VOL
 HOST_VOL['dump']="-v /var/www/nailgun/dump:/var/www/nailgun/dump"
-HOST_VOL['repo']="-v /var/www/nailgun/centos:/var/www/nailgun/centos:ro -v /var/www/nailgun/ubuntu:/var/www/nailgun/ubuntu:ro \
--v /var/www/nailgun/eggs:/var/www/nailgun/eggs:ro -v /var/www/nailgun/gems:/var/www/nailgun/gems:ro"
+HOST_VOL['repo']="-v /var/www/nailgun/centos:/var/www/nailgun/centos:ro -v /var/www/nailgun/ubuntu:/var/www/nailgun/ubuntu:ro -v /var/www/nailgun/eggs:/var/www/nailgun/eggs:ro -v /var/www/nailgun/gems:/var/www/nailgun/gems:ro"
 HOST_VOL['puppet']="-v /etc/puppet:/etc/puppet:ro"
 HOST_VOL['sshkey']="-v /root/.ssh:/root/.ssh:ro"
 HOST_VOL['astuteyaml']="-v /etc/fuel:/etc/fuel:ro"
@@ -90,11 +89,13 @@ CONTAINER_VOLUMES[$REPO_CNT]="${HOST_VOL['repo']}"
 CONTAINER_VOLUMES[$PUPPET_CNT]="${HOST_VOL['puppet']}"
 
 #Storage container volumes
-DUMP_VOL="-volumes-from $DUMP_CNT"
-REPO_VOL="-volumes-from $REPO_CNT"
-PUPPET_VOL="-volumes-from $PUPPET_CNT"
-LOG_VOL="-volumes-from $LOG_CNT"
+DUMP_VOL="--volumes-from $DUMP_CNT"
+REPO_VOL="--volumes-from $REPO_CNT"
+PUPPET_VOL="--volumes-from $PUPPET_CNT"
+LOG_VOL="--volumes-from $LOG_CNT"
 
+#Nailgun static files are in nailgun container
+NAILGUN_STATIC_VOL="--volumes-from ${CONTAINER_NAMES['nailgun']}"
 #App container volume mounts
 ###requirements cheat sheet
 ###ALL: astuteyaml $REPO_CNT $PUPPET_CNT $LOG_CNT
@@ -106,12 +107,13 @@ LOG_VOL="-volumes-from $LOG_CNT"
 declare -A REQS
 REQS["${HOST_VOL['astuteyaml']}"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
 REQS["$REPO_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
-REQS["$PUPPET_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
+#none of the containers work from master puppet yet, so don't attach puppet vol
+#REQS["$PUPPET_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
 REQS["$LOG_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
 REQS["${HOST_VOL['sshkey']}"]="nailgun cobbler astute"
-REQS["$DUMP_CNT"]="nginx mcollective"
+REQS["$DUMP_VOL"]="nginx mcollective"
 REQS["${HOST_VOL['remotelogs']}"]="rsyslog"
-REQS["--volumes-from $CONTAINER_NAME['nailgun']"]="nginx"
+REQS["$NAILGUN_STATIC_VOL"]="nginx"
 
 #assemble requirements 
 for requirement in "${!REQS[@]}"; do

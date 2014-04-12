@@ -10,6 +10,7 @@ function show_usage {
   echo "  start: start all Docker containers"
   echo "  restart: restart one or more Docker containers"
   echo "  stop: stop one or more Docker containers"
+  echo "  shell: start a shell or run a command in a Docker container"
   echo "  upgrade: upgrade deployment"
   echo "  destroy: destroy one or more containers"
 }
@@ -34,7 +35,7 @@ function run_storage_containers {
   #Note: storage containers exit, but keep volumes available
   
   #Remove existing ones if they exist
-  kill_storage_containers
+  #kill_storage_containers
   docker run -d ${CONTAINER_VOLUMES[$DUMP_CNT]} --name "$DUMP_CNT" storage/dump || true
   docker run -d ${CONTAINER_VOLUMES[$REPO_CNT]} --name "$REPO_CNT" storage/repo || true
   docker run -d ${CONTAINER_VOLUMES[$PUPPET_CNT]} --name "$PUPPET_CNT" storage/puppet || true
@@ -115,6 +116,21 @@ function attach_container {
   docker attach $1
 }
 
+function shell_container {
+  container_name=${CONTAINER_NAMES[$1]}
+  if ! is_running $container_name; then
+    echo "Container $1 is not running. Cannot attach." 1>&2
+  fi
+  id=$(docker inspect -f='{{.ID}}' ${CONTAINER_NAMES[$1]})
+  if [ -z $id ]; then
+     echo "Could not get docker ID for $container. Is it running?" 1>&2
+     return 1
+  fi
+  if [ -z $2 ]; then
+    command="/bin/bash"
+  fi
+  lxc-attach --name $id $command
+}
 function stop_container {
   if [[ "$1" == 'all' ]]; then
     docker stop ${CONTAINER_NAMES[$1]}
@@ -134,6 +150,22 @@ function destroy_container {
     for container in $@; do
       stop_container $container
       docker rm ${CONTAINER_NAMES[$container]}
+      if [ $? -ne 0 ]; then
+        #This happens because devicemapper glitched
+        #Try to unmount all devicemapper mounts manually and try again
+        echo "Destruction of container $container failed. Trying workaround..."
+        id=$(docker inspect -f='{{.ID}}' ${CONTAINER_NAMES[$container]})
+        if [ -z $id ]; then
+          echo "Could not get docker ID for $container" 1>&2
+          return 1
+        fi
+        umount -l $(grep "$id" /proc/mounts | awk '{print $2}' | sort -r)
+        #Try to delete again
+        docker rm ${CONTAINER_NAMES[$container]}
+        if [ $? -ne 0 ];then
+          echo "Workaround failed. Unable to destroy container $container."
+        fi
+      fi
     done
   fi
 }
@@ -194,7 +226,7 @@ function setup_dhcrelay_for_cobbler {
     echo "ERROR: Cobbler container isn't running." 1>&2
     exit 1
   fi
-  cobbler_ip=$(docker inspect -format='{{.NetworkSettings.IPAddress}}' ${CONTAINER_NAME["cobbler"]})
+  cobbler_ip=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' ${CONTAINER_NAME["cobbler"]})
   admin_interface=$(grep interface: $ASTUTE_YAML | cut -d':' -f2 | tr -d ' ')
   cat > /etc/sysconfig/dhcrelay << EOF
 # Command line options here
