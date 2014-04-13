@@ -34,7 +34,7 @@ if [ "$1" == "build" ]; then
     cp $SUPERVISOR_CONF_DIR/* /etc/supervisord.d/
   
     #Step 3: Launch all in order
-    apps="cobbler postgres rabbitmq rsync astute nailgun ostf nginx mcollective"
+    apps="cobbler postgres rabbitmq rsync astute nailgun ostf nginx mcollectived"
     for service in $apps; do
       start_container $service
       #supervisorctl start $service
