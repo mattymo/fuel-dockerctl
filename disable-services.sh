@@ -1,7 +1,7 @@
 #!/bin/bash
 
 system_services="cobblerd httpd xinetd postgresql rabbitmq-server nginx dnsmasq rsyslog mcollective"
-supervisord_services="assassind nailgun naily ostf receiverd"
+supervisord_services="assassind nailgun ostf receiverd astute"
 
 for system_service in $system_services; do
   chkconfig $system_service off
