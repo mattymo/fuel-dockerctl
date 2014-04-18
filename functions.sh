@@ -217,10 +217,27 @@ function post_hooks {
   case $1 in
     cobbler)   setup_dhcrelay_for_cobbler
                ;;
+    rsyslog)   remangle_syslog
+               ;;
     *)         ;;
   esac
 }
 
+function remangle_syslog {
+  #Necessary to forward packets to rsyslog with correct src ip
+  if ! is_running "rsyslos"; then
+    echo "ERROR: Rsyslog container isn't running." 1>&2
+    exit 1
+  fi
+  cobbler_ip=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' ${CONTAINER_NAMES["rsyslog"]})
+  admin_interface=$(grep interface: $ASTUTE_YAML | cut -d':' -f2 | tr -d ' ')
+  #Use facter and ipcalc to get admin network CIDR
+  admin_net_ip=$(facter "ipaddress_${admin_interface}")
+  admin_net_netmask=$(facter "netmask_$admin_interface")
+  eval $(ipcalc -np "$admin_net_ip" "$admin_net_netmask")
+  iptables -t nat -I POSTROUTING 2 -s "$NETWORK/$PREFIX" -p udp -m multiport --dport 514 -j ACCEPT
+  iptables -I FORWARD -i $admin_interface -o docker0  -m state --state NEW -p udp -m udp --dport 514 -j ACCEPT
+}
 function setup_dhcrelay_for_cobbler {
   if ! is_running "cobbler"; then
     echo "ERROR: Cobbler container isn't running." 1>&2

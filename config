@@ -22,14 +22,14 @@ ZIP_EXT=".tar.xz"
 declare -A SOURCE_IMAGES
 SOURCE_IMAGES['cobbler']="${IMAGE_DIR}/cobbler${ZIP_EXT}"
 SOURCE_IMAGES['postgres']="${IMAGE_DIR}/postgres${ZIP_EXT}"
-SOURCE_IMAGES['cobbler']="${IMAGE_DIR}/rabbitmq${ZIP_EXT}"
+SOURCE_IMAGES['rabbitmq']="${IMAGE_DIR}/rabbitmq${ZIP_EXT}"
 SOURCE_IMAGES['rsync']="${IMAGE_DIR}/rsync${ZIP_EXT}"
 SOURCE_IMAGES['astute']="${IMAGE_DIR}/astute${ZIP_EXT}"
 SOURCE_IMAGES['nailgun']="${IMAGE_DIR}/nailgun${ZIP_EXT}"
 SOURCE_IMAGES['ostf']="${IMAGE_DIR}/ostf${ZIP_EXT}"
 SOURCE_IMAGES['nginx']="${IMAGE_DIR}/nginx${ZIP_EXT}"
 SOURCE_IMAGES['rsyslog']="${IMAGE_DIR}/rsyslog${ZIP_EXT}"
-SOURCE_IMAGES['mcollectived']="${IMAGE_DIR}/mcollectived${ZIP_EXT}"
+SOURCE_IMAGES['mcollective']="${IMAGE_DIR}/mcollective${ZIP_EXT}"
 
 # storage container names
 PREFIX_STORAGE="fuel-storage-${VERSION}-"
@@ -50,7 +50,7 @@ CONTAINER_NAMES['nailgun']="${prefix}nailgun"
 CONTAINER_NAMES['ostf']="${prefix}ostf"
 CONTAINER_NAMES['nginx']="${prefix}nginx"
 CONTAINER_NAMES['rsyslog']="${prefix}rsyslog"
-CONTAINER_NAMES['mcollectived']="${prefix}mcollectived"
+CONTAINER_NAMES['mcollective']="${prefix}mcollective"
 
 # app container options
 declare -A CONTAINER_OPTIONS
@@ -65,8 +65,8 @@ CONTAINER_OPTIONS["astute"]="$base_opts"
 CONTAINER_OPTIONS["nailgun"]="-p 8001:8001 $base_opts"
 CONTAINER_OPTIONS["ostf"]="-p 8777:8777 $base_opts"
 CONTAINER_OPTIONS["nginx"]="-p 8000:8000 -p 8080:8080 $base_opts"
-CONTAINER_OPTIONS["rsyslog"]="-p 514:514 -p 514:514/udp $base_opts"
-CONTAINER_OPTIONS["mcollectived"]="--privileged $base_opts"
+CONTAINER_OPTIONS["rsyslog"]="--privileged -p 514:514 -p 514:514/udp -p 25150 $base_opts"
+CONTAINER_OPTIONS["mcollective"]="--privileged $base_opts"
 
 ######
 #DRAFT: Dependency of volumes for deployment
@@ -74,12 +74,12 @@ CONTAINER_OPTIONS["mcollectived"]="--privileged $base_opts"
 
 #Host volumes
 declare -A HOST_VOL
-HOST_VOL['dump']="-v /var/www/nailgun/dump:/var/www/nailgun/dump"
+HOST_VOL['dump']="-v /var/www/nailgun/dump:/dump"
 HOST_VOL['repo']="-v /var/www/nailgun:/repo:ro"
 HOST_VOL['puppet']="-v /etc/puppet:/puppet:ro"
 HOST_VOL['sshkey']="-v /root/.ssh:/root/.ssh:ro"
 HOST_VOL['astuteyaml']="-v /etc/fuel:/etc/fuel:ro"
-HOST_VOL['remotelogs']="-v /var/log/remote:/var/log/remote:ro"
+HOST_VOL['remotelogs']="-v /var/log/remote:/var/log/remote"
 HOST_VOL['dockerlogs']="-v /var/log/docker-logs:/log"
 
 #Storage container volume mounts
@@ -103,19 +103,22 @@ NAILGUN_STATIC_VOL="--volumes-from ${CONTAINER_NAMES['nailgun']}"
 ###requirements cheat sheet
 ###ALL: astuteyaml $REPO_CNT $PUPPET_CNT $LOG_CNT
 ###sshkey: nailgun cobbler astute
-###dump: nginx mcollectived
+###dump: nginx mcollective
 ###remotelogs: rsyslog
 ###nailgun: nginx
 
 declare -A REQS
-REQS["${HOST_VOL['astuteyaml']}"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollectived"
-REQS["$REPO_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollectived"
+REQS["${HOST_VOL['astuteyaml']}"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
+#Repo now reads from default gateway (the current host) port 8080
+#REQS["$REPO_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
+REQS["$REPO_VOL"]="cobbler nginx"
 #none of the containers work from master puppet yet, so don't attach puppet vol
+REQS["$PUPPET_VOL"]="rsync"
 #REQS["$PUPPET_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
-REQS["$LOG_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollectived"
-REQS["${HOST_VOL['sshkey']}"]="nailgun cobbler astute mcollectived"
-REQS["$DUMP_VOL"]="nginx mcollectived"
-REQS["${HOST_VOL['remotelogs']}"]="rsyslog"
+REQS["$LOG_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
+REQS["${HOST_VOL['sshkey']}"]="nailgun cobbler astute mcollective"
+REQS["$DUMP_VOL"]="nginx mcollective"
+REQS["${HOST_VOL['remotelogs']}"]="rsyslog nailgun astute"
 REQS["$NAILGUN_STATIC_VOL"]="nginx"
 
 #assemble requirements 
