@@ -15,9 +15,8 @@ RUN mkdir -p /opt/gateone/users/ANONYMOUS/
 RUN mkdir -p /var/log/nailgun
 
 ADD etc /etc
-ADD init.pp /root/init.pp
 
-RUN puppet apply -v /root/init.pp
+RUN puppet apply -v /etc/puppet/modules/nailgun/examples/nailgun-only.pp
 
 RUN mkdir -p /usr/local/bin
 ADD start.sh /usr/local/bin/start.sh
