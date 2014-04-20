@@ -62,7 +62,7 @@ CONTAINER_OPTIONS["postgres"]="-p 5432:5432 $base_opts"
 CONTAINER_OPTIONS["rabbitmq"]="-p 5672:5672 -p 4369:4369 -p 15672:15672 -p 61613:61613 $base_opts"
 CONTAINER_OPTIONS["rsync"]="-p 873:873 $base_opts"
 CONTAINER_OPTIONS["astute"]="$base_opts"
-CONTAINER_OPTIONS["nailgun"]="-p 8001:8001 $base_opts"
+CONTAINER_OPTIONS["nailgun"]="-v /etc/nailgun -p 8001:8001 $base_opts"
 CONTAINER_OPTIONS["ostf"]="-p 8777:8777 $base_opts"
 CONTAINER_OPTIONS["nginx"]="-p 8000:8000 -p 8080:8080 $base_opts"
 CONTAINER_OPTIONS["rsyslog"]="--privileged -p 514:514 -p 514:514/udp -p 25150 $base_opts"
@@ -75,51 +75,52 @@ CONTAINER_OPTIONS["mcollective"]="--privileged $base_opts"
 #Host volumes
 declare -A HOST_VOL
 HOST_VOL['dump']="-v /var/www/nailgun/dump:/dump"
+#HOST_VOL['dump']="-v /var/www/nailgun/dump:/var/www/nailgun/dump"
 HOST_VOL['repo']="-v /var/www/nailgun:/repo:ro"
 HOST_VOL['puppet']="-v /etc/puppet:/puppet:ro"
 HOST_VOL['sshkey']="-v /root/.ssh:/root/.ssh:ro"
 HOST_VOL['astuteyaml']="-v /etc/fuel:/etc/fuel:ro"
-HOST_VOL['remotelogs']="-v /var/log/remote:/var/log/remote"
+HOST_VOL['remotelogs']="-v /var/log/remote:/remote"
 HOST_VOL['dockerlogs']="-v /var/log/docker-logs:/log"
 
 #Storage container volume mounts
 declare -A CONTAINER_VOLUMES
 CONTAINER_VOLUMES[$DUMP_CNT]="${HOST_VOL['dump']}"
 CONTAINER_VOLUMES[$REPO_CNT]="${HOST_VOL['repo']}"
-#TODO(mattymo): load modules in during initial run instead of host dir
+#TODO(mattymo): inject puppet modules to puppet container during initial run 
+#instead of relaying host dir
 CONTAINER_VOLUMES[$PUPPET_CNT]="${HOST_VOL['puppet']}"
-CONTAINER_VOLUMES[$LOG_CNT]="${HOST_VOL['dockerlogs']}"
+CONTAINER_VOLUMES[$LOG_CNT]="${HOST_VOL['dockerlogs']} ${HOST_VOL['remotelogs']}"
 
 #Storage container volumes
 DUMP_VOL="--volumes-from $DUMP_CNT"
 REPO_VOL="--volumes-from $REPO_CNT"
 PUPPET_VOL="--volumes-from $PUPPET_CNT"
-LOG_VOL="--volumes-from $LOG_CNT"
+LOG_VOL="-v /var/log/docker-logs:/var/log"
+#LOG_VOL="--volumes-from $LOG_CNT"
 
 #Nailgun static files are in nailgun container
-NAILGUN_STATIC_VOL="--volumes-from ${CONTAINER_NAMES['nailgun']}"
+NAILGUN_VOL="--volumes-from ${CONTAINER_NAMES['nailgun']}"
 
 #App container volume mounts
 ###requirements cheat sheet
-###ALL: astuteyaml $REPO_CNT $PUPPET_CNT $LOG_CNT
-###sshkey: nailgun cobbler astute
+###ALL: astuteyaml $REPO_CNT
+###sshkey: nailgun cobbler astute mcollective
 ###dump: nginx mcollective
-###remotelogs: rsyslog
-###nailgun: nginx
+###remotelogs: rsyslog nailgun nginx
+###nailgun: nginx mcollective
 
 declare -A REQS
-REQS["${HOST_VOL['astuteyaml']}"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
-#Repo now reads from default gateway (the current host) port 8080
-#REQS["$REPO_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
+REQS["${HOST_VOL['astuteyaml']}"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollectivei rsync"
 REQS["$REPO_VOL"]="cobbler nginx"
-#none of the containers work from master puppet yet, so don't attach puppet vol
+#Most containers work from master puppet yet, so don't attach puppet vol
 REQS["$PUPPET_VOL"]="rsync"
 #REQS["$PUPPET_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
-REQS["$LOG_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
+REQS["$LOG_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective rsync"
 REQS["${HOST_VOL['sshkey']}"]="nailgun cobbler astute mcollective"
-REQS["$DUMP_VOL"]="nginx mcollective"
-REQS["${HOST_VOL['remotelogs']}"]="rsyslog nailgun astute"
-REQS["$NAILGUN_STATIC_VOL"]="nginx"
+REQS["${HOST_VOL['dump']}"]="nginx mcollective"
+#REQS["${HOST_VOL['remotelogs']}"]="rsyslog nailgun nginx"
+REQS["$NAILGUN_VOL"]="nginx mcollective"
 
 #assemble requirements 
 for requirement in "${!REQS[@]}"; do

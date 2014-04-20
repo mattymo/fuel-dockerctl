@@ -170,6 +170,11 @@ function destroy_container {
   fi
 }
 
+function logs {
+  docker logs ${CONTAINER_NAMES[$1]}
+}
+
+
 
 function restart_container {
   docker restart ${CONTAINER_NAMES[$1]}
@@ -225,7 +230,7 @@ function post_hooks {
 
 function remangle_syslog {
   #Necessary to forward packets to rsyslog with correct src ip
-  if ! is_running "rsyslos"; then
+  if ! is_running "rsyslog"; then
     echo "ERROR: Rsyslog container isn't running." 1>&2
     exit 1
   fi
