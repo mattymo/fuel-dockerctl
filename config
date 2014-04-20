@@ -17,7 +17,7 @@ BUSYBOX_IMAGE="busybox.tar.gz"
 # base centos image for all containers
 BASE_IMAGE="centos.tar.gz"
 
-ZIP_EXT=".tar.xz"
+ZIP_EXT=${ZIP_EXT:-".tar.xz"}
 # source images for apps
 declare -A SOURCE_IMAGES
 SOURCE_IMAGES['cobbler']="${IMAGE_DIR}/cobbler${ZIP_EXT}"

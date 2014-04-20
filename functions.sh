@@ -51,6 +51,10 @@ function kill_storage_containers {
 function import_images {
   #Imports images with xz, gzip, or simple tar format
   for image_archive in $@; do
+    if [ ! -f $image_archive ]; then
+      echo "Warning: $image_archive does not exist. Skipping..."
+      continue
+    fi
     debug "Importing $image_archive"
     image="$(echo $image_archive | cut -d. -f1)"
     if egrep -q "gz\$" <<< "$image_archive"; then
