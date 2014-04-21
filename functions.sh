@@ -33,7 +33,7 @@ function build_storage_containers {
 function run_storage_containers {
   #Run storage containers once
   #Note: storage containers exit, but keep volumes available
-  
+
   #Remove existing ones if they exist
   #kill_storage_containers
   docker run -d ${CONTAINER_VOLUMES[$DUMP_CNT]} --name "$DUMP_CNT" storage/dump || true
@@ -106,7 +106,7 @@ function start_container {
     else
       docker start $container_name
     fi
-    if [ "$2" = "--attach" ]; then 
+    if [ "$2" = "--attach" ]; then
       attach_container $container_name
     fi
   else
@@ -138,7 +138,7 @@ function shell_container {
 function stop_container {
   if [[ "$1" == 'all' ]]; then
     docker stop ${CONTAINER_NAMES[$1]}
-  else 
+  else
     for container in $@; do
       echo "Stopping $container..."
       docker stop ${CONTAINER_NAMES[$container]}
@@ -212,7 +212,7 @@ function first_run_container {
   else
       echo "$container_name is already running."
   fi
-  if [ "$2" = "--attach" ]; then 
+  if [ "$2" = "--attach" ]; then
       attach_container $container_name
   fi
   return 0
@@ -228,27 +228,33 @@ function post_hooks {
                ;;
     rsyslog)   remangle_syslog
                ;;
+    nginx)     remangle_nginx
+               ;;
     *)         ;;
   esac
 }
-
-function remangle_syslog {
-  #Necessary to forward packets to rsyslog with correct src ip
-  if ! is_running "rsyslog"; then
-    echo "ERROR: Rsyslog container isn't running." 1>&2
-    exit 1
-  fi
-  cobbler_ip=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' ${CONTAINER_NAMES["rsyslog"]})
+function remangle_port {
+  proto=$1
+  port=$2
   admin_interface=$(grep interface: $ASTUTE_YAML | cut -d':' -f2 | tr -d ' ')
   #Use facter and ipcalc to get admin network CIDR
   admin_net_ip=$(facter "ipaddress_${admin_interface}")
   admin_net_netmask=$(facter "netmask_$admin_interface")
   eval $(ipcalc -np "$admin_net_ip" "$admin_net_netmask")
-  iptables -t nat -I POSTROUTING 2 -s "$NETWORK/$PREFIX" -p udp -m udp --dport 514 -j ACCEPT
-  iptables -t nat -I POSTROUTING 3 -s "$NETWORK/$PREFIX" -p tcp -m tcp --dport 514 -j ACCEPT
-  iptables -I FORWARD -i $admin_interface -o docker0  -m state --state NEW -p udp -m udp --dport 514 -j ACCEPT
-  iptables -I FORWARD -i $admin_interface -o docker0  -m state --state NEW -p tcp -m tcp --dport 514 -j ACCEPT
+  iptables -t nat -I POSTROUTING 1 -s "$NETWORK/$PREFIX" -p $proto -m $proto --dport $port -j ACCEPT
+  iptables -I FORWARD -i $admin_interface -o docker0  -m state --state NEW -p $proto  -m $proto --dport $port -j ACCEPT
+
+function remangle_nginx {
+  #Necessary to forward packets to rsyslog with correct src ip
+  remangle_port tcp 8000
+  remangle_port tcp 8080
 }
+function remangle_syslog {
+  #Necessary to forward packets to rsyslog with correct src ip
+  remangle_port tcp 514
+  remangle_port udp 514
+}
+
 function setup_dhcrelay_for_cobbler {
   if ! is_running "cobbler"; then
     echo "ERROR: Cobbler container isn't running." 1>&2
