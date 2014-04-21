@@ -244,8 +244,10 @@ function remangle_syslog {
   admin_net_ip=$(facter "ipaddress_${admin_interface}")
   admin_net_netmask=$(facter "netmask_$admin_interface")
   eval $(ipcalc -np "$admin_net_ip" "$admin_net_netmask")
-  iptables -t nat -I POSTROUTING 2 -s "$NETWORK/$PREFIX" -p udp -m multiport --dport 514 -j ACCEPT
+  iptables -t nat -I POSTROUTING 2 -s "$NETWORK/$PREFIX" -p udp -m udp --dport 514 -j ACCEPT
+  iptables -t nat -I POSTROUTING 3 -s "$NETWORK/$PREFIX" -p tcp -m tcp --dport 514 -j ACCEPT
   iptables -I FORWARD -i $admin_interface -o docker0  -m state --state NEW -p udp -m udp --dport 514 -j ACCEPT
+  iptables -I FORWARD -i $admin_interface -o docker0  -m state --state NEW -p tcp -m tcp --dport 514 -j ACCEPT
 }
 function setup_dhcrelay_for_cobbler {
   if ! is_running "cobbler"; then

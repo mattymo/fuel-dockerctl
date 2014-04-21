@@ -111,12 +111,12 @@ NAILGUN_VOL="--volumes-from ${CONTAINER_NAMES['nailgun']}"
 ###nailgun: nginx mcollective
 
 declare -A REQS
-REQS["${HOST_VOL['astuteyaml']}"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollectivei rsync"
+REQS["${HOST_VOL['astuteyaml']}"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
 REQS["$REPO_VOL"]="cobbler nginx"
 #Most containers work from master puppet yet, so don't attach puppet vol
 REQS["$PUPPET_VOL"]="rsync"
 #REQS["$PUPPET_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
-REQS["$LOG_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective rsync"
+REQS["$LOG_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
 REQS["${HOST_VOL['sshkey']}"]="nailgun cobbler astute mcollective"
 REQS["${HOST_VOL['dump']}"]="nginx mcollective"
 #REQS["${HOST_VOL['remotelogs']}"]="rsyslog nailgun nginx"
