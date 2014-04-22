@@ -104,7 +104,7 @@ NAILGUN_VOL="--volumes-from ${CONTAINER_NAMES['nailgun']}"
 
 #App container volume mounts
 ###requirements cheat sheet
-###ALL: astuteyaml $REPO_CNT
+###ALL: astuteyaml $REPO_CNT $LOG_VOL
 ###sshkey: nailgun cobbler astute mcollective
 ###dump: nginx mcollective
 ###remotelogs: rsyslog nailgun nginx
@@ -112,7 +112,7 @@ NAILGUN_VOL="--volumes-from ${CONTAINER_NAMES['nailgun']}"
 
 declare -A REQS
 REQS["${HOST_VOL['astuteyaml']}"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
-REQS["$REPO_VOL"]="cobbler nginx"
+REQS["$REPO_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
 #Most containers work from local integrated puppet
 REQS["$PUPPET_VOL"]="rsync"
 #REQS["$PUPPET_VOL"]="cobbler postgres rabbitmq rsync astute nailgun ostf nginx rsyslog mcollective"
