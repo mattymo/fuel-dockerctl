@@ -26,13 +26,13 @@ if [ "$1" == "build" ]; then
     #Step 1: prepare storage containers
     build_storage_containers
     run_storage_containers
-  
+
     #Step 2: import app images
     import_images ${SOURCE_IMAGES[@]}
-  
+
     #Step 3: Prepare supervisord
     cp $SUPERVISOR_CONF_DIR/* /etc/supervisord.d/
-  
+
     #Step 3: Launch all in order
     apps="cobbler postgres rabbitmq rsync astute nailgun ostf nginx mcollective rsyslog"
     for service in $apps; do
@@ -56,8 +56,17 @@ if [ "$1" == "build" ]; then
     start_container $container
   fi
 elif [ "$1" == "start" ]; then
-  shift 2
-  start_container $container $@
+  if [ "$container" = "all" ];then
+    apps="cobbler postgres rabbitmq rsync astute nailgun ostf nginx mcollective rsyslog"
+    for service in $apps; do
+      start_container $service
+      #supervisorctl start $service
+      sleep 2
+    done
+  else
+    shift 2
+    start_container $container $@
+  fi
 elif [ "$1" == "restart" ]; then
   shift 2
   restart_container $container $@

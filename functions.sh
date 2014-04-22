@@ -39,7 +39,7 @@ function run_storage_containers {
   docker run -d ${CONTAINER_VOLUMES[$DUMP_CNT]} --name "$DUMP_CNT" storage/dump || true
   docker run -d ${CONTAINER_VOLUMES[$REPO_CNT]} --name "$REPO_CNT" storage/repo || true
   docker run -d ${CONTAINER_VOLUMES[$PUPPET_CNT]} --name "$PUPPET_CNT" storage/puppet || true
-  docker run -d ${CONTAINER_VOLUMES[$LOG_CNT]} --name "$LOG_CNT" storage/log || true
+  #docker run -d ${CONTAINER_VOLUMES[$LOG_CNT]} --name "$LOG_CNT" storage/log || true
 }
 
 function kill_storage_containers {
@@ -243,12 +243,14 @@ function remangle_port {
   eval $(ipcalc -np "$admin_net_ip" "$admin_net_netmask")
   iptables -t nat -I POSTROUTING 1 -s "$NETWORK/$PREFIX" -p $proto -m $proto --dport $port -j ACCEPT
   iptables -I FORWARD -i $admin_interface -o docker0  -m state --state NEW -p $proto  -m $proto --dport $port -j ACCEPT
+}
 
 function remangle_nginx {
   #Necessary to forward packets to rsyslog with correct src ip
   remangle_port tcp 8000
   remangle_port tcp 8080
 }
+
 function remangle_syslog {
   #Necessary to forward packets to rsyslog with correct src ip
   remangle_port tcp 514
