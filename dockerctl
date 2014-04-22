@@ -34,7 +34,7 @@ if [ "$1" == "build" ]; then
     cp $SUPERVISOR_CONF_DIR/* /etc/supervisord.d/
 
     #Step 3: Launch all in order
-    apps="postgres cobbler rabbitmq rsync astute mcollective rsyslog nginx nailgun ostf"
+    apps="postgres rabbitmq rsync astute mcollective rsyslog nailgun ostf nginx cobbler"
     for service in $apps; do
       start_container $service
       sleep 4
@@ -46,7 +46,7 @@ if [ "$1" == "build" ]; then
     mkdir -p /etc/supervisord.d
     cp -R $confdir/supervisor/* /etc/supervisord.d/
     cp /etc/puppet/modules/nailgun/templates/supervisord.conf.base.erb /etc/supervisord.conf
-    service supervisor start
+    service supervisord start
 
     #Step 4: Test deployment TODO(mattymo)
     #run_tests $apps
@@ -56,7 +56,7 @@ if [ "$1" == "build" ]; then
   fi
 elif [ "$1" == "start" ]; then
   if [ "$container" = "all" ];then
-    apps="postgres cobbler rabbitmq rsync astute mcollective rsyslog nginx nailgun ostf"
+    apps="postgres rabbitmq rsync astute mcollective rsyslog nailgun ostf nginx cobbler"
     for service in $apps; do
       start_container $service
       #supervisorctl start $service
