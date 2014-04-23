@@ -34,7 +34,7 @@ if [ "$1" == "build" ]; then
     cp $SUPERVISOR_CONF_DIR/* /etc/supervisord.d/
 
     #Step 3: Launch all in order
-    apps="postgres rabbitmq rsync astute mcollective rsyslog nailgun ostf nginx cobbler"
+    apps="postgres rabbitmq rsync astute rsyslog nailgun mcollective ostf nginx cobbler"
     for service in $apps; do
       start_container $service
       sleep 4
@@ -56,7 +56,8 @@ if [ "$1" == "build" ]; then
   fi
 elif [ "$1" == "start" ]; then
   if [ "$container" = "all" ];then
-    apps="postgres rabbitmq rsync astute mcollective rsyslog nailgun ostf nginx cobbler"
+    apps="postgres rabbitmq rsync astute rsyslog nailgun mcollective ostf nginx cobbler"
+
     for service in $apps; do
       start_container $service
       #supervisorctl start $service
