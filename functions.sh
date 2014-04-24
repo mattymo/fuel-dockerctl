@@ -132,9 +132,13 @@ function shell_container {
   fi
   if [ -z $2 ]; then
     command="/bin/bash"
+  else
+    shift
+    command="$@"
   fi
-  lxc-attach --name $id $command
+  lxc-attach --name $id $@
 }
+
 function stop_container {
   if [[ "$1" == 'all' ]]; then
     docker stop ${CONTAINER_NAMES[$1]}
@@ -275,4 +279,8 @@ EOF
   rpm -q dhcp 2>&1 > /dev/null || yum --quiet -y install dhcp
   chkconfig dhcrelay on
   service dhcrelay restart
+}
+
+function allow_all_docker_traffic {
+  iptables -A POSTROUTING -t nat  -o docker0  -j MASQUERADE
 }

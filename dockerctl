@@ -33,6 +33,9 @@ if [ "$1" == "build" ]; then
     #Step 3: Prepare supervisord
     cp $SUPERVISOR_CONF_DIR/* /etc/supervisord.d/
 
+    #Prepare iptables just in case ICC is broken
+    allow_all_docker_traffic
+
     #Step 3: Launch all in order
     apps="postgres rabbitmq rsync astute rsyslog nailgun mcollective ostf nginx cobbler"
     for service in $apps; do
