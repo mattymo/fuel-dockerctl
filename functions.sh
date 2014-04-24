@@ -204,7 +204,7 @@ function first_run_container {
 
   opts="${CONTAINER_OPTIONS[$1]} ${CONTAINER_VOLUMES[$1]}"
   container_name="${CONTAINER_NAMES[$1]}"
-  image="$IMAGE_PREFIX/$1"
+  image="$IMAGE_PREFIX/$1_$VERSION"
   if ! is_running $container_name; then
       pre_hooks $1
       docker run $opts $BACKGROUND --name=$container_name $image
